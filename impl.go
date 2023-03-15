@@ -6,6 +6,7 @@ import (
 	"github.com/kpango/glg"
 	"github.com/odysseia-greek/plato/models"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -60,6 +61,13 @@ type Elastic struct {
 }
 
 func NewClient(config Config) (Client, error) {
+	//https://patorjk.com/software/taag/#p=display&f=Crawford2&t=ARISTOTELES
+	glg.Info("\n  ____  ____   ____ _____ ______   ___   ______    ___  _        ___  _____\n /    ||    \\ |    / ___/|      | /   \\ |      |  /  _]| |      /  _]/ ___/\n|  o  ||  D  ) |  (   \\_ |      ||     ||      | /  [_ | |     /  [_(   \\_ \n|     ||    /  |  |\\__  ||_|  |_||  O  ||_|  |_||    _]| |___ |    _]\\__  |\n|  _  ||    \\  |  |/  \\ |  |  |  |     |  |  |  |   [_ |     ||   [_ /  \\ |\n|  |  ||  .  \\ |  |\\    |  |  |  |     |  |  |  |     ||     ||     |\\    |\n|__|__||__|\\_||____|\\___|  |__|   \\___/   |__|  |_____||_____||_____| \\___|\n                                                                           \n")
+	glg.Info(strings.Repeat("~", 37))
+	glg.Info("\"Τριών δει παιδεία: φύσεως, μαθήσεως, ασκήσεως.\"")
+	glg.Info("\"Education needs these three: natural endowment, study, practice.\"")
+	glg.Info(strings.Repeat("~", 37))
+
 	var err error
 	var esClient *elasticsearch.Client
 	if config.ElasticCERT != "" {
