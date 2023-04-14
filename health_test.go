@@ -1,6 +1,7 @@
 package aristoteles
 
 import (
+	"github.com/odysseia-greek/aristoteles/models"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
@@ -42,7 +43,7 @@ func TestHealthClient(t *testing.T) {
 	})
 
 	t.Run("NoConnection", func(t *testing.T) {
-		config := Config{
+		config := models.Config{
 			Service:     "hhttttt://sjdsj.com",
 			Username:    "",
 			Password:    "",

@@ -2,8 +2,9 @@ package aristoteles
 
 import (
 	"fmt"
-	"github.com/kpango/glg"
+	"github.com/odysseia-greek/aristoteles/models"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"time"
@@ -36,25 +37,25 @@ func ElasticService(tls bool) string {
 	elasticService := os.Getenv(EnvElasticService)
 	if elasticService == "" {
 		if tls {
-			glg.Debugf("setting %s to default: %s", EnvElasticService, elasticServiceDefaultTlS)
+			log.Printf("setting %s to default: %s", EnvElasticService, elasticServiceDefaultTlS)
 			elasticService = elasticServiceDefaultTlS
 		} else {
-			glg.Debugf("setting %s to default: %s", EnvElasticService, elasticServiceDefault)
+			log.Printf("setting %s to default: %s", EnvElasticService, elasticServiceDefault)
 			elasticService = elasticServiceDefault
 		}
 	}
 	return elasticService
 }
 
-func ElasticConfig(env string, testOverwrite, tls bool) Config {
+func ElasticConfig(env string, testOverwrite, tls bool) models.Config {
 	elasticUser := os.Getenv(EnvElasticUser)
 	if elasticUser == "" {
-		glg.Debugf("setting %s to default: %s", EnvElasticUser, elasticUsernameDefault)
+		log.Printf("setting %s to default: %s", EnvElasticUser, elasticUsernameDefault)
 		elasticUser = elasticUsernameDefault
 	}
 	elasticPassword := os.Getenv(EnvElasticPassword)
 	if elasticPassword == "" {
-		glg.Debugf("setting %s to default: %s", EnvElasticPassword, elasticPasswordDefault)
+		log.Printf("setting %s to default: %s", EnvElasticPassword, elasticPasswordDefault)
 		elasticPassword = elasticPasswordDefault
 	}
 
@@ -65,7 +66,7 @@ func ElasticConfig(env string, testOverwrite, tls bool) Config {
 
 	elasticService := ElasticService(tls)
 
-	esConf := Config{
+	esConf := models.Config{
 		Service:     elasticService,
 		Username:    elasticUser,
 		Password:    elasticPassword,
@@ -90,7 +91,7 @@ func GetCert(env string, testOverWrite bool) []byte {
 	}
 
 	if testOverWrite {
-		glg.Info("trying to read cert file from file")
+		log.Print("trying to read cert file from file")
 		certPath := filepath.Join("eratosthenes", "elastic-test-cert.pem")
 
 		cert, _ = ioutil.ReadFile(certPath)
@@ -98,7 +99,7 @@ func GetCert(env string, testOverWrite bool) []byte {
 		return cert
 	}
 
-	glg.Info("trying to read cert file from pod")
+	log.Print("trying to read cert file from pod")
 	cert, _ = ioutil.ReadFile(certPathInPod)
 
 	return cert

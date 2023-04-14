@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/elastic/go-elasticsearch/v8"
 	"github.com/elastic/go-elasticsearch/v8/esapi"
+	"github.com/odysseia-greek/aristoteles/models"
 	"io/ioutil"
 	"time"
 )
@@ -17,7 +18,7 @@ func NewQueryImpl(suppliedClient *elasticsearch.Client) (*QueryImpl, error) {
 	return &QueryImpl{es: suppliedClient}, nil
 }
 
-func (q *QueryImpl) Match(index string, request map[string]interface{}) (*Response, error) {
+func (q *QueryImpl) Match(index string, request map[string]interface{}) (*models.Response, error) {
 	query, err := toBuffer(request)
 	if err != nil {
 		return nil, err
@@ -38,7 +39,7 @@ func (q *QueryImpl) Match(index string, request map[string]interface{}) (*Respon
 	return q.parseResponse(res)
 }
 
-func (q *QueryImpl) MatchWithSort(index, direction, sortField string, size int, request map[string]interface{}) (*Response, error) {
+func (q *QueryImpl) MatchWithSort(index, direction, sortField string, size int, request map[string]interface{}) (*models.Response, error) {
 	query, err := toBuffer(request)
 	if err != nil {
 		return nil, err
@@ -61,8 +62,8 @@ func (q *QueryImpl) MatchWithSort(index, direction, sortField string, size int, 
 	return q.parseResponse(res)
 }
 
-func (q *QueryImpl) MatchWithScroll(index string, request map[string]interface{}) (*Response, error) {
-	var elasticResult Response
+func (q *QueryImpl) MatchWithScroll(index string, request map[string]interface{}) (*models.Response, error) {
+	var elasticResult models.Response
 
 	query, err := toBuffer(request)
 	if err != nil {
@@ -110,7 +111,7 @@ func (q *QueryImpl) MatchWithScroll(index string, request map[string]interface{}
 		}
 
 		scrollBody, _ := ioutil.ReadAll(scrollRes.Body)
-		scrollResponse, err := UnmarshalResponse(scrollBody)
+		scrollResponse, err := models.UnmarshalResponse(scrollBody)
 		if err != nil {
 			return nil, err
 		}
@@ -126,7 +127,7 @@ func (q *QueryImpl) MatchWithScroll(index string, request map[string]interface{}
 	return &elasticResult, nil
 }
 
-func (q *QueryImpl) MatchAggregate(index string, request map[string]interface{}) (*Aggregations, error) {
+func (q *QueryImpl) MatchAggregate(index string, request map[string]interface{}) (*models.Aggregations, error) {
 	query, err := toBuffer(request)
 	if err != nil {
 		return nil, err
@@ -147,7 +148,7 @@ func (q *QueryImpl) MatchAggregate(index string, request map[string]interface{})
 	return q.parseAggregate(res)
 }
 
-func (q *QueryImpl) parseResponse(res *esapi.Response) (*Response, error) {
+func (q *QueryImpl) parseResponse(res *esapi.Response) (*models.Response, error) {
 	defer res.Body.Close()
 
 	if res.IsError() {
@@ -155,7 +156,7 @@ func (q *QueryImpl) parseResponse(res *esapi.Response) (*Response, error) {
 	}
 
 	body, _ := ioutil.ReadAll(res.Body)
-	result, err := UnmarshalResponse(body)
+	result, err := models.UnmarshalResponse(body)
 	if err != nil {
 		return nil, err
 	}
@@ -163,7 +164,7 @@ func (q *QueryImpl) parseResponse(res *esapi.Response) (*Response, error) {
 	return &result, nil
 }
 
-func (q *QueryImpl) parseAggregate(res *esapi.Response) (*Aggregations, error) {
+func (q *QueryImpl) parseAggregate(res *esapi.Response) (*models.Aggregations, error) {
 	defer res.Body.Close()
 
 	if res.IsError() {
@@ -171,7 +172,7 @@ func (q *QueryImpl) parseAggregate(res *esapi.Response) (*Aggregations, error) {
 	}
 
 	body, _ := ioutil.ReadAll(res.Body)
-	result, err := UnmarshalAggregations(body)
+	result, err := models.UnmarshalAggregations(body)
 	if err != nil {
 		return nil, err
 	}

@@ -6,8 +6,9 @@ import (
 	"fmt"
 	"github.com/elastic/go-elasticsearch/v8"
 	"github.com/elastic/go-elasticsearch/v8/esapi"
-	"github.com/kpango/glg"
+	"github.com/odysseia-greek/aristoteles/models"
 	"io/ioutil"
+	"log"
 	"strings"
 )
 
@@ -19,8 +20,8 @@ func NewIndexImpl(suppliedClient *elasticsearch.Client) (*IndexImpl, error) {
 	return &IndexImpl{es: suppliedClient}, nil
 }
 
-func (i *IndexImpl) CreateDocument(index string, body []byte) (*CreateResult, error) {
-	var elasticResult CreateResult
+func (i *IndexImpl) CreateDocument(index string, body []byte) (*models.CreateResult, error) {
+	var elasticResult models.CreateResult
 	bodyString := strings.NewReader(string(body))
 
 	esRequest := esapi.IndexRequest{
@@ -42,7 +43,7 @@ func (i *IndexImpl) CreateDocument(index string, body []byte) (*CreateResult, er
 	}
 
 	jsonBody, _ := ioutil.ReadAll(res.Body)
-	elasticResult, err = UnmarshalCreateResult(jsonBody)
+	elasticResult, err = models.UnmarshalCreateResult(jsonBody)
 	if err != nil {
 		return nil, err
 	}
@@ -50,13 +51,13 @@ func (i *IndexImpl) CreateDocument(index string, body []byte) (*CreateResult, er
 	return &elasticResult, nil
 }
 
-func (i *IndexImpl) Create(index string, request map[string]interface{}) (*IndexCreateResult, error) {
+func (i *IndexImpl) Create(index string, request map[string]interface{}) (*models.IndexCreateResult, error) {
 	query, err := toBuffer(request)
 	if err != nil {
 		return nil, err
 	}
 
-	var elasticResult IndexCreateResult
+	var elasticResult models.IndexCreateResult
 	indexRequest := esapi.IndicesCreateRequest{
 		Index: index,
 		Body:  &query,
@@ -73,7 +74,7 @@ func (i *IndexImpl) Create(index string, request map[string]interface{}) (*Index
 	}
 
 	jsonBody, _ := ioutil.ReadAll(res.Body)
-	elasticResult, err = UnmarshalIndexCreateResult(jsonBody)
+	elasticResult, err = models.UnmarshalIndexCreateResult(jsonBody)
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +83,7 @@ func (i *IndexImpl) Create(index string, request map[string]interface{}) (*Index
 }
 
 func (i *IndexImpl) Delete(index string) (bool, error) {
-	glg.Warnf("deleting index: %s", index)
+	log.Printf("deleting index: %s", index)
 
 	res, err := i.es.Indices.Delete([]string{index})
 	if err != nil {
