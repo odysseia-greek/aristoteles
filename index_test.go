@@ -198,7 +198,7 @@ func TestDeleteIndexClient(t *testing.T) {
 		assert.Nil(t, err)
 
 		sut, err := testClient.Index().Delete(index)
-		assert.Nil(t, err)
+		assert.NotNil(t, err)
 		assert.False(t, sut)
 	})
 

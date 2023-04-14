@@ -181,3 +181,29 @@ type IndexCreateResult struct {
 	ShardsAcknowledged bool   `json:"shards_acknowledged"`
 	Index              string `json:"index"`
 }
+
+type IndexError struct {
+	Error struct {
+		RootCause []struct {
+			Type         string `json:"type"`
+			Reason       string `json:"reason"`
+			ResourceType string `json:"resource.type"`
+			ResourceId   string `json:"resource.id"`
+			IndexUuid    string `json:"index_uuid"`
+			Index        string `json:"index"`
+		} `json:"root_cause"`
+		Type         string `json:"type"`
+		Reason       string `json:"reason"`
+		ResourceType string `json:"resource.type"`
+		ResourceId   string `json:"resource.id"`
+		IndexUuid    string `json:"index_uuid"`
+		Index        string `json:"index"`
+	} `json:"error"`
+	Status int `json:"status"`
+}
+
+func UnmarshalIndexError(data []byte) (IndexError, error) {
+	var r IndexError
+	err := json.Unmarshal(data, &r)
+	return r, err
+}

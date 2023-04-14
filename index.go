@@ -89,16 +89,14 @@ func (i *IndexImpl) Delete(index string) (bool, error) {
 		return false, err
 	}
 
-	if res.IsError() {
-		if res.StatusCode == 404 {
-			return false, nil
-		}
-		return false, fmt.Errorf("%s: %s", errorMessage, res.Status())
-	}
-
 	var r map[string]interface{}
 	if err := json.NewDecoder(res.Body).Decode(&r); err != nil {
 		return false, err
+	}
+
+	if res.IsError() {
+		l, _ := json.Marshal(r)
+		return false, fmt.Errorf(string(l))
 	}
 
 	return r["acknowledged"].(bool), nil
