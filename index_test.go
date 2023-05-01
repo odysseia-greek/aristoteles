@@ -183,6 +183,7 @@ func TestDeleteIndexClient(t *testing.T) {
 		sut, err := testClient.Index().Delete(index)
 		assert.NotNil(t, err)
 		assert.False(t, sut)
+		assert.Contains(t, err.Error(), "index_not_found_exception")
 	})
 
 	t.Run("NoConnection", func(t *testing.T) {

@@ -12,6 +12,7 @@ import (
 
 type Client interface {
 	Query() Query
+	Document() Document
 	Index() Index
 	Builder() Builder
 	Health() Health
@@ -23,6 +24,11 @@ type Query interface {
 	MatchWithSort(index, mode, sort string, size int, request map[string]interface{}) (*models.Response, error)
 	MatchWithScroll(index string, request map[string]interface{}) (*models.Response, error)
 	MatchAggregate(index string, request map[string]interface{}) (*models.Aggregations, error)
+}
+
+type Document interface {
+	Create(index string, body []byte) (*models.CreateResult, error)
+	Update(index, id string, body []byte) (*models.CreateResult, error)
 }
 
 type Index interface {
@@ -53,11 +59,12 @@ type Access interface {
 }
 
 type Elastic struct {
-	query   *QueryImpl
-	index   *IndexImpl
-	builder *BuilderImpl
-	health  *HealthImpl
-	access  *AccessImpl
+	document *DocumentImpl
+	query    *QueryImpl
+	index    *IndexImpl
+	builder  *BuilderImpl
+	health   *HealthImpl
+	access   *AccessImpl
 }
 
 func NewClient(config models.Config) (Client, error) {
@@ -102,9 +109,14 @@ func NewClient(config models.Config) (Client, error) {
 		return nil, err
 	}
 
+	document, err := NewDocumentImpl(esClient)
+	if err != nil {
+		return nil, err
+	}
+
 	builder := NewBuilderImpl()
 
-	es := &Elastic{query: query, index: index, builder: builder, health: health, access: access}
+	es := &Elastic{query: query, index: index, builder: builder, health: health, access: access, document: document}
 
 	return es, nil
 }
@@ -135,9 +147,14 @@ func NewMockClient(fixtureFile string, statusCode int) (Client, error) {
 		return nil, err
 	}
 
+	document, err := NewDocumentImpl(esClient)
+	if err != nil {
+		return nil, err
+	}
+
 	builder := NewBuilderImpl()
 
-	es := &Elastic{query: query, index: index, builder: builder, health: health, access: access}
+	es := &Elastic{query: query, index: index, builder: builder, health: health, access: access, document: document}
 
 	return es, nil
 }
@@ -202,6 +219,13 @@ func (e *Elastic) Query() Query {
 		return nil
 	}
 	return e.query
+}
+
+func (e *Elastic) Document() Document {
+	if e == nil {
+		return nil
+	}
+	return e.document
 }
 
 func (e *Elastic) Index() Index {
