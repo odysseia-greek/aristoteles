@@ -3,8 +3,8 @@ package aristoteles
 import (
 	"crypto/x509"
 	"github.com/elastic/go-elasticsearch/v8"
-	"github.com/kpango/glg"
-	"github.com/odysseia-greek/plato/models"
+	"github.com/odysseia-greek/aristoteles/models"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -12,6 +12,7 @@ import (
 
 type Client interface {
 	Query() Query
+	Document() Document
 	Index() Index
 	Builder() Builder
 	Health() Health
@@ -19,15 +20,20 @@ type Client interface {
 }
 
 type Query interface {
-	Match(index string, request map[string]interface{}) (*Response, error)
-	MatchWithSort(index, mode, sort string, size int, request map[string]interface{}) (*Response, error)
-	MatchWithScroll(index string, request map[string]interface{}) (*Response, error)
-	MatchAggregate(index string, request map[string]interface{}) (*Aggregations, error)
+	Match(index string, request map[string]interface{}) (*models.Response, error)
+	MatchWithSort(index, mode, sort string, size int, request map[string]interface{}) (*models.Response, error)
+	MatchWithScroll(index string, request map[string]interface{}) (*models.Response, error)
+	MatchAggregate(index string, request map[string]interface{}) (*models.Aggregations, error)
+}
+
+type Document interface {
+	Create(index string, body []byte) (*models.CreateResult, error)
+	Update(index, id string, body []byte) (*models.CreateResult, error)
 }
 
 type Index interface {
-	CreateDocument(index string, body []byte) (*CreateResult, error)
-	Create(index string, request map[string]interface{}) (*IndexCreateResult, error)
+	CreateDocument(index string, body []byte) (*models.CreateResult, error)
+	Create(index string, request map[string]interface{}) (*models.IndexCreateResult, error)
 	Delete(index string) (bool, error)
 }
 
@@ -48,25 +54,26 @@ type Health interface {
 }
 
 type Access interface {
-	CreateRole(name string, roleRequest CreateRoleRequest) (bool, error)
-	CreateUser(name string, userCreation CreateUserRequest) (bool, error)
+	CreateRole(name string, roleRequest models.CreateRoleRequest) (bool, error)
+	CreateUser(name string, userCreation models.CreateUserRequest) (bool, error)
 }
 
 type Elastic struct {
-	query   *QueryImpl
-	index   *IndexImpl
-	builder *BuilderImpl
-	health  *HealthImpl
-	access  *AccessImpl
+	document *DocumentImpl
+	query    *QueryImpl
+	index    *IndexImpl
+	builder  *BuilderImpl
+	health   *HealthImpl
+	access   *AccessImpl
 }
 
-func NewClient(config Config) (Client, error) {
+func NewClient(config models.Config) (Client, error) {
 	//https://patorjk.com/software/taag/#p=display&f=Crawford2&t=ARISTOTELES
-	glg.Info("\n  ____  ____   ____ _____ ______   ___   ______    ___  _        ___  _____\n /    ||    \\ |    / ___/|      | /   \\ |      |  /  _]| |      /  _]/ ___/\n|  o  ||  D  ) |  (   \\_ |      ||     ||      | /  [_ | |     /  [_(   \\_ \n|     ||    /  |  |\\__  ||_|  |_||  O  ||_|  |_||    _]| |___ |    _]\\__  |\n|  _  ||    \\  |  |/  \\ |  |  |  |     |  |  |  |   [_ |     ||   [_ /  \\ |\n|  |  ||  .  \\ |  |\\    |  |  |  |     |  |  |  |     ||     ||     |\\    |\n|__|__||__|\\_||____|\\___|  |__|   \\___/   |__|  |_____||_____||_____| \\___|\n                                                                           \n")
-	glg.Info(strings.Repeat("~", 37))
-	glg.Info("\"Τριών δει παιδεία: φύσεως, μαθήσεως, ασκήσεως.\"")
-	glg.Info("\"Education needs these three: natural endowment, study, practice.\"")
-	glg.Info(strings.Repeat("~", 37))
+	log.Print("\n  ____  ____   ____ _____ ______   ___   ______    ___  _        ___  _____\n /    ||    \\ |    / ___/|      | /   \\ |      |  /  _]| |      /  _]/ ___/\n|  o  ||  D  ) |  (   \\_ |      ||     ||      | /  [_ | |     /  [_(   \\_ \n|     ||    /  |  |\\__  ||_|  |_||  O  ||_|  |_||    _]| |___ |    _]\\__  |\n|  _  ||    \\  |  |/  \\ |  |  |  |     |  |  |  |   [_ |     ||   [_ /  \\ |\n|  |  ||  .  \\ |  |\\    |  |  |  |     |  |  |  |     ||     ||     |\\    |\n|__|__||__|\\_||____|\\___|  |__|   \\___/   |__|  |_____||_____||_____| \\___|\n                                                                           \n")
+	log.Print(strings.Repeat("~", 37))
+	log.Print("\"Τριών δει παιδεία: φύσεως, μαθήσεως, ασκήσεως.\"")
+	log.Print("\"Education needs these three: natural endowment, study, practice.\"")
+	log.Print(strings.Repeat("~", 37))
 
 	var err error
 	var esClient *elasticsearch.Client
@@ -102,9 +109,14 @@ func NewClient(config Config) (Client, error) {
 		return nil, err
 	}
 
+	document, err := NewDocumentImpl(esClient)
+	if err != nil {
+		return nil, err
+	}
+
 	builder := NewBuilderImpl()
 
-	es := &Elastic{query: query, index: index, builder: builder, health: health, access: access}
+	es := &Elastic{query: query, index: index, builder: builder, health: health, access: access, document: document}
 
 	return es, nil
 }
@@ -135,15 +147,20 @@ func NewMockClient(fixtureFile string, statusCode int) (Client, error) {
 		return nil, err
 	}
 
+	document, err := NewDocumentImpl(esClient)
+	if err != nil {
+		return nil, err
+	}
+
 	builder := NewBuilderImpl()
 
-	es := &Elastic{query: query, index: index, builder: builder, health: health, access: access}
+	es := &Elastic{query: query, index: index, builder: builder, health: health, access: access, document: document}
 
 	return es, nil
 }
 
-func create(config Config) (*elasticsearch.Client, error) {
-	glg.Info("creating elasticClient")
+func create(config models.Config) (*elasticsearch.Client, error) {
+	log.Print("creating elasticClient")
 
 	cfg := elasticsearch.Config{
 		Username:  config.Username,
@@ -152,15 +169,15 @@ func create(config Config) (*elasticsearch.Client, error) {
 	}
 	es, err := elasticsearch.NewClient(cfg)
 	if err != nil {
-		glg.Errorf("Error creating the client: %s", err)
+		log.Printf("Error creating the client: %s", err)
 		return nil, err
 	}
 
 	return es, nil
 }
 
-func createWithTLS(config Config) (*elasticsearch.Client, error) {
-	glg.Info("creating elasticClient with tls")
+func createWithTLS(config models.Config) (*elasticsearch.Client, error) {
+	log.Print("creating elasticClient with tls")
 
 	caCert := []byte(config.ElasticCERT)
 
@@ -173,13 +190,13 @@ func createWithTLS(config Config) (*elasticsearch.Client, error) {
 	var err error
 
 	if tp.TLSClientConfig.RootCAs, err = x509.SystemCertPool(); err != nil {
-		glg.Fatalf("ERROR: Problem adding system CA: %s", err)
+		log.Fatalf("ERROR: Problem adding system CA: %s", err)
 	}
 
 	// --> Add the custom certificate authority
 	//
 	if ok := tp.TLSClientConfig.RootCAs.AppendCertsFromPEM(caCert); !ok {
-		glg.Fatalf("ERROR: Problem adding CA from file %q", caCert)
+		log.Fatalf("ERROR: Problem adding CA from file %q", caCert)
 	}
 
 	cfg := elasticsearch.Config{
@@ -190,7 +207,7 @@ func createWithTLS(config Config) (*elasticsearch.Client, error) {
 	}
 	es, err := elasticsearch.NewClient(cfg)
 	if err != nil {
-		glg.Errorf("Error creating the client: %s", err)
+		log.Printf("Error creating the client: %s", err)
 		return nil, err
 	}
 
@@ -202,6 +219,13 @@ func (e *Elastic) Query() Query {
 		return nil
 	}
 	return e.query
+}
+
+func (e *Elastic) Document() Document {
+	if e == nil {
+		return nil
+	}
+	return e.document
 }
 
 func (e *Elastic) Index() Index {

@@ -1,19 +1,14 @@
 package aristoteles
 
 import (
-	"github.com/odysseia-greek/plato/models"
+	"github.com/odysseia-greek/aristoteles/models"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestCreateDocumentWithIndexClient(t *testing.T) {
 	index := "test"
-	body := models.Meros{
-		Greek:      "μάχη",
-		English:    "battle",
-		LinkedWord: "",
-		Original:   "",
-	}
+	body := []byte(`{"Greek":"μάχη","English":"battle"}`)
 
 	t.Run("Created", func(t *testing.T) {
 		file := "createDocument"
@@ -21,10 +16,7 @@ func TestCreateDocumentWithIndexClient(t *testing.T) {
 		testClient, err := NewMockClient(file, status)
 		assert.Nil(t, err)
 
-		sut, err := body.Marshal()
-		assert.Nil(t, err)
-
-		created, err := testClient.Index().CreateDocument(index, sut)
+		created, err := testClient.Index().CreateDocument(index, body)
 		assert.Nil(t, err)
 		assert.Equal(t, index, created.Index)
 	})
@@ -35,10 +27,7 @@ func TestCreateDocumentWithIndexClient(t *testing.T) {
 		testClient, err := NewMockClient(file, status)
 		assert.Nil(t, err)
 
-		sut, err := body.Marshal()
-		assert.Nil(t, err)
-
-		created, err := testClient.Index().CreateDocument(index, sut)
+		created, err := testClient.Index().CreateDocument(index, body)
 		assert.NotNil(t, err)
 		assert.Nil(t, created)
 	})
@@ -49,16 +38,13 @@ func TestCreateDocumentWithIndexClient(t *testing.T) {
 		testClient, err := NewMockClient(file, status)
 		assert.Nil(t, err)
 
-		sut, err := body.Marshal()
-		assert.Nil(t, err)
-
-		created, err := testClient.Index().CreateDocument(index, sut)
+		created, err := testClient.Index().CreateDocument(index, body)
 		assert.NotNil(t, err)
 		assert.Nil(t, created)
 	})
 
 	t.Run("NoConnection", func(t *testing.T) {
-		config := Config{
+		config := models.Config{
 			Service:     "hhttttt://sjdsj.com",
 			Username:    "",
 			Password:    "",
@@ -67,10 +53,7 @@ func TestCreateDocumentWithIndexClient(t *testing.T) {
 		testClient, err := NewClient(config)
 		assert.Nil(t, err)
 
-		sut, err := body.Marshal()
-		assert.Nil(t, err)
-
-		created, err := testClient.Index().CreateDocument(index, sut)
+		created, err := testClient.Index().CreateDocument(index, body)
 		assert.NotNil(t, err)
 		assert.Nil(t, created)
 	})
@@ -137,7 +120,7 @@ func TestCreateIndexClient(t *testing.T) {
 	})
 
 	t.Run("NoConnection", func(t *testing.T) {
-		config := Config{
+		config := models.Config{
 			Service:     "hhttttt://sjdsj.com",
 			Username:    "",
 			Password:    "",
@@ -198,12 +181,13 @@ func TestDeleteIndexClient(t *testing.T) {
 		assert.Nil(t, err)
 
 		sut, err := testClient.Index().Delete(index)
-		assert.Nil(t, err)
+		assert.NotNil(t, err)
 		assert.False(t, sut)
+		assert.Contains(t, err.Error(), "index_not_found_exception")
 	})
 
 	t.Run("NoConnection", func(t *testing.T) {
-		config := Config{
+		config := models.Config{
 			Service:     "hhttttt://sjdsj.com",
 			Username:    "",
 			Password:    "",

@@ -23,7 +23,7 @@ func init() {
 	dirParts := strings.Split(callingDir, string(os.PathSeparator))
 	var aristotelesElasticPath []string
 	for i, part := range dirParts {
-		if part == "aristoteles" {
+		if strings.Contains(part, "aristoteles") {
 			aristotelesElasticPath = dirParts[0 : i+1]
 		}
 	}

@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/elastic/go-elasticsearch/v8"
-	"github.com/kpango/glg"
-	"github.com/odysseia-greek/plato/models"
+	"github.com/odysseia-greek/aristoteles/models"
+	"log"
 	"time"
 )
 
@@ -26,11 +26,11 @@ func (h *HealthImpl) Check(ticks, tick time.Duration) bool {
 	for {
 		select {
 		case t := <-ticker.C:
-			glg.Infof("tick: %s", t)
+			log.Printf("tick: %s", t)
 			res := h.Info()
 			healthy = res.Healthy
 			if !healthy {
-				glg.Debug("Elastic not yet healthy")
+				log.Print("Elastic not yet healthy")
 				continue
 			}
 

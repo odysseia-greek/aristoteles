@@ -2,6 +2,7 @@ package aristoteles
 
 import (
 	"fmt"
+	"github.com/odysseia-greek/aristoteles/models"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -70,7 +71,7 @@ func TestQueryClientMatch(t *testing.T) {
 	})
 
 	t.Run("NoConnection", func(t *testing.T) {
-		config := Config{
+		config := models.Config{
 			Service:     "hhttttt://sjdsj.com",
 			Username:    "",
 			Password:    "",
@@ -150,7 +151,7 @@ func TestQueryClientMatchWithScroll(t *testing.T) {
 	})
 
 	t.Run("NoConnection", func(t *testing.T) {
-		config := Config{
+		config := models.Config{
 			Service:     "hhttttt://sjdsj.com",
 			Username:    "",
 			Password:    "",
@@ -232,7 +233,7 @@ func TestQueryClientMatchAggregate(t *testing.T) {
 	})
 
 	t.Run("NoConnection", func(t *testing.T) {
-		config := Config{
+		config := models.Config{
 			Service:     "hhttttt://sjdsj.com",
 			Username:    "",
 			Password:    "",
@@ -319,7 +320,7 @@ func TestQueryClientSort(t *testing.T) {
 	})
 
 	t.Run("NoConnection", func(t *testing.T) {
-		config := Config{
+		config := models.Config{
 			Service:     "hhttttt://sjdsj.com",
 			Username:    "",
 			Password:    "",

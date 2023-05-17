@@ -4,31 +4,32 @@ import (
 	"github.com/odysseia-greek/aristoteles/models"
 	"github.com/stretchr/testify/assert"
 	"testing"
-	"time"
 )
 
-func TestHealthClient(t *testing.T) {
-	standardTicks := 10 * time.Millisecond
-	tick := 10 * time.Millisecond
+func TestCreateDocument(t *testing.T) {
+	index := "test"
+	body := []byte(`{"Greek":"μάχη","English":"battle"}`)
 
-	t.Run("Healthy", func(t *testing.T) {
-		file := "info"
+	t.Run("Created", func(t *testing.T) {
+		file := "createDocument"
 		status := 200
 		testClient, err := NewMockClient(file, status)
 		assert.Nil(t, err)
 
-		healthy := testClient.Health().Check(standardTicks, tick)
-		assert.True(t, healthy)
+		created, err := testClient.Document().Create(index, body)
+		assert.Nil(t, err)
+		assert.Equal(t, index, created.Index)
 	})
 
-	t.Run("Unhealthy", func(t *testing.T) {
-		file := "infoServiceDown"
+	t.Run("Failed", func(t *testing.T) {
+		file := "createIndex"
 		status := 502
 		testClient, err := NewMockClient(file, status)
 		assert.Nil(t, err)
 
-		healthy := testClient.Health().Check(standardTicks, tick)
-		assert.False(t, healthy)
+		created, err := testClient.Document().Create(index, body)
+		assert.NotNil(t, err)
+		assert.Nil(t, created)
 	})
 
 	t.Run("Malformed", func(t *testing.T) {
@@ -37,9 +38,9 @@ func TestHealthClient(t *testing.T) {
 		testClient, err := NewMockClient(file, status)
 		assert.Nil(t, err)
 
-		healthy := testClient.Health().Check(standardTicks, tick)
-
-		assert.False(t, healthy)
+		created, err := testClient.Document().Create(index, body)
+		assert.NotNil(t, err)
+		assert.Nil(t, created)
 	})
 
 	t.Run("NoConnection", func(t *testing.T) {
@@ -52,8 +53,8 @@ func TestHealthClient(t *testing.T) {
 		testClient, err := NewClient(config)
 		assert.Nil(t, err)
 
-		healthy := testClient.Health().Check(standardTicks, tick)
-
-		assert.False(t, healthy)
+		created, err := testClient.Document().Create(index, body)
+		assert.NotNil(t, err)
+		assert.Nil(t, created)
 	})
 }

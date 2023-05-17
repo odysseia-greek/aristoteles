@@ -1,6 +1,7 @@
 package aristoteles
 
 import (
+	"github.com/odysseia-greek/aristoteles/models"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -14,12 +15,12 @@ func TestCreateRoles(t *testing.T) {
 		testClient, err := NewMockClient(file, status)
 		assert.Nil(t, err)
 
-		roleRequest := CreateRoleRequest{
+		roleRequest := models.CreateRoleRequest{
 			Cluster:      nil,
 			Indices:      nil,
 			Applications: nil,
 			RunAs:        nil,
-			Metadata:     Metadata{},
+			Metadata:     models.Metadata{},
 		}
 		sut, err := testClient.Access().CreateRole(name, roleRequest)
 		assert.Nil(t, err)
@@ -32,12 +33,12 @@ func TestCreateRoles(t *testing.T) {
 		testClient, err := NewMockClient(file, status)
 		assert.Nil(t, err)
 
-		roleRequest := CreateRoleRequest{
+		roleRequest := models.CreateRoleRequest{
 			Cluster:      nil,
 			Indices:      nil,
 			Applications: nil,
 			RunAs:        nil,
-			Metadata:     Metadata{},
+			Metadata:     models.Metadata{},
 		}
 
 		sut, err := testClient.Access().CreateRole(name, roleRequest)
@@ -46,7 +47,7 @@ func TestCreateRoles(t *testing.T) {
 	})
 
 	t.Run("NoConnection", func(t *testing.T) {
-		config := Config{
+		config := models.Config{
 			Service:     "hhttttt://sjdsj.com",
 			Username:    "",
 			Password:    "",
@@ -55,12 +56,12 @@ func TestCreateRoles(t *testing.T) {
 		testClient, err := NewClient(config)
 		assert.Nil(t, err)
 
-		roleRequest := CreateRoleRequest{
+		roleRequest := models.CreateRoleRequest{
 			Cluster:      nil,
 			Indices:      nil,
 			Applications: nil,
 			RunAs:        nil,
-			Metadata:     Metadata{},
+			Metadata:     models.Metadata{},
 		}
 
 		sut, err := testClient.Access().CreateRole(name, roleRequest)
@@ -78,7 +79,7 @@ func TestCreateUser(t *testing.T) {
 		testClient, err := NewMockClient(file, status)
 		assert.Nil(t, err)
 
-		userRequest := CreateUserRequest{
+		userRequest := models.CreateUserRequest{
 			Password: "password",
 			Roles:    []string{"admin"},
 			FullName: "Alexandros Megalos",
@@ -96,7 +97,7 @@ func TestCreateUser(t *testing.T) {
 		testClient, err := NewMockClient(file, status)
 		assert.Nil(t, err)
 
-		userRequest := CreateUserRequest{
+		userRequest := models.CreateUserRequest{
 			Password: "password",
 			Roles:    []string{"admin"},
 			FullName: "Alexandros Megalos",
@@ -110,7 +111,7 @@ func TestCreateUser(t *testing.T) {
 	})
 
 	t.Run("NoConnection", func(t *testing.T) {
-		config := Config{
+		config := models.Config{
 			Service:     "hhttttt://sjdsj.com",
 			Username:    "",
 			Password:    "",
@@ -119,7 +120,7 @@ func TestCreateUser(t *testing.T) {
 		testClient, err := NewClient(config)
 		assert.Nil(t, err)
 
-		userRequest := CreateUserRequest{
+		userRequest := models.CreateUserRequest{
 			Password: "password",
 			Roles:    []string{"admin"},
 			FullName: "Alexandros Megalos",
