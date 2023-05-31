@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	certPathInPod            = "/app/config/certs/elastic-certificate.pem"
+	certPathInPod            = "/app/config/elastic/tls.crt"
 	elasticServiceDefault    = "http://localhost:9200"
 	elasticServiceDefaultTlS = "https://localhost:9200"
 	elasticUsernameDefault   = "elastic"
