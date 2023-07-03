@@ -41,11 +41,16 @@ type Builder interface {
 	MatchQuery(term, queryWord string) map[string]interface{}
 	MatchAll() map[string]interface{}
 	MultipleMatch(mappedFields []map[string]string) map[string]interface{}
-	MultiMatchWithGram(queryWord string) map[string]interface{}
+	MultiMatchWithGram(queryWord, field string) map[string]interface{}
+	MatchPhrasePrefixed(queryWord, field string) map[string]interface{}
 	Aggregate(aggregate, field string) map[string]interface{}
 	FilteredAggregate(term, queryWord, aggregate, field string) map[string]interface{}
 	SearchAsYouTypeIndex(searchWord string) map[string]interface{}
 	Index() map[string]interface{}
+	TextIndex() map[string]interface{}
+	DictionaryIndex(min, max int) map[string]interface{}
+	GrammarIndex() map[string]interface{}
+	QuizIndex() map[string]interface{}
 }
 
 type Health interface {
