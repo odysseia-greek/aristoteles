@@ -1,5 +1,7 @@
 package aristoteles
 
+import "fmt"
+
 type BuilderImpl struct {
 }
 
@@ -50,7 +52,7 @@ func (b *BuilderImpl) MultipleMatch(mappedFields []map[string]string) map[string
 	return query
 }
 
-func (b *BuilderImpl) MultiMatchWithGram(queryWord string) map[string]interface{} {
+func (b *BuilderImpl) MultiMatchWithGram(queryWord, field string) map[string]interface{} {
 	return map[string]interface{}{
 		"size": 15,
 		"query": map[string]interface{}{
@@ -58,7 +60,7 @@ func (b *BuilderImpl) MultiMatchWithGram(queryWord string) map[string]interface{
 				"query": queryWord,
 				"type":  "bool_prefix",
 				"fields": [3]string{
-					"greek", "greek._2gram", "greek._3gram",
+					field, fmt.Sprintf("%s._2gram", field), fmt.Sprintf("%s._3gram", field),
 				},
 			},
 		},
