@@ -261,8 +261,12 @@ func (b *BuilderImpl) GrammarIndex() map[string]interface{} {
 }
 
 func (b *BuilderImpl) DictionaryIndex(min, max int) map[string]interface{} {
+	nGramDiff := max - min
 	return map[string]interface{}{
 		"settings": map[string]interface{}{
+			"index": map[string]interface{}{
+				"max_ngram_diff": nGramDiff,
+			},
 			"analysis": map[string]interface{}{
 				"analyzer": map[string]interface{}{
 					"greek_analyzer": map[string]interface{}{
@@ -306,25 +310,10 @@ func (b *BuilderImpl) DictionaryIndex(min, max int) map[string]interface{} {
 						},
 					},
 				},
-				"linkedWord": map[string]interface{}{
-					"type": "text",
-					"fields": map[string]interface{}{
-						"keyword": map[string]interface{}{
-							"type": "keyword",
-						},
-					},
-				},
-				"original": map[string]interface{}{
-					"type": "text",
-					"fields": map[string]interface{}{
-						"keyword": map[string]interface{}{
-							"type": "keyword",
-						},
-					},
-				},
 			},
 		},
 	}
+
 }
 
 func (b *BuilderImpl) Index() map[string]interface{} {
