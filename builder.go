@@ -1,6 +1,8 @@
 package aristoteles
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type BuilderImpl struct {
 }
@@ -65,6 +67,18 @@ func (b *BuilderImpl) MultiMatchWithGram(queryWord, field string) map[string]int
 			},
 		},
 	}
+}
+
+func (b *BuilderImpl) MatchPhrasePrefixed(queryWord, field string) map[string]interface{} {
+	query := map[string]interface{}{
+		"query": map[string]interface{}{
+			"match_phrase_prefix": map[string]interface{}{
+				field: queryWord,
+			},
+		},
+	}
+
+	return query
 }
 
 func (b *BuilderImpl) Aggregate(aggregate, field string) map[string]interface{} {
@@ -246,7 +260,7 @@ func (b *BuilderImpl) GrammarIndex() map[string]interface{} {
 
 }
 
-func (b *BuilderImpl) DictionaryIndex() map[string]interface{} {
+func (b *BuilderImpl) DictionaryIndex(min, max int) map[string]interface{} {
 	return map[string]interface{}{
 		"settings": map[string]interface{}{
 			"analysis": map[string]interface{}{
@@ -258,8 +272,8 @@ func (b *BuilderImpl) DictionaryIndex() map[string]interface{} {
 				"tokenizer": map[string]interface{}{
 					"greek_tokenizer": map[string]interface{}{
 						"type":        "ngram",
-						"min_gram":    3,
-						"max_gram":    3,
+						"min_gram":    min,
+						"max_gram":    max,
 						"token_chars": []string{"letter"},
 					},
 				},
