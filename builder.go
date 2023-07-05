@@ -130,31 +130,6 @@ func (b *BuilderImpl) SearchAsYouTypeIndex(searchWord string) map[string]interfa
 
 func (b *BuilderImpl) TextIndex() map[string]interface{} {
 	return map[string]interface{}{
-		"settings": map[string]interface{}{
-			"analysis": map[string]interface{}{
-				"analyzer": map[string]interface{}{
-					"greek_analyzer": map[string]interface{}{
-						"type":      "custom",
-						"tokenizer": "standard",
-						"filter": []string{
-							"lowercase",
-							"greek_stop",
-							"greek_stemmer",
-						},
-					},
-				},
-				"filter": map[string]interface{}{
-					"greek_stop": map[string]interface{}{
-						"type":      "stop",
-						"stopwords": "_greek_",
-					},
-					"greek_stemmer": map[string]interface{}{
-						"type":     "stemmer",
-						"language": "greek",
-					},
-				},
-			},
-		},
 		"mappings": map[string]interface{}{
 			"properties": map[string]interface{}{
 				"author": map[string]interface{}{
@@ -170,25 +145,50 @@ func (b *BuilderImpl) TextIndex() map[string]interface{} {
 					},
 				},
 				"translations": map[string]interface{}{
-					"type": "text",
-					"fields": map[string]interface{}{
-						"keyword": map[string]interface{}{
+					"type": "nested",
+					"properties": map[string]interface{}{
+						"book": map[string]interface{}{
+							"type": "integer",
+						},
+						"chapter": map[string]interface{}{
+							"type": "integer",
+						},
+						"fields": map[string]interface{}{
+							"type": "text",
+							"fields": map[string]interface{}{
+								"keyword": map[string]interface{}{
+									"type": "keyword",
+								},
+							},
+						},
+						"perseusTextLink": map[string]interface{}{
 							"type": "keyword",
 						},
+						"section": map[string]interface{}{
+							"type": "integer",
+						},
 					},
-					"book": map[string]interface{}{
-						"type": "integer",
+				},
+			},
+		},
+		"settings": map[string]interface{}{
+			"analysis": map[string]interface{}{
+				"analyzer": map[string]interface{}{
+					"greek_analyzer": map[string]interface{}{
+						"type":     "custom",
+						"tokenizer": "standard",
+						"filter":   []string{"lowercase", "greek_stop", "greek_stemmer"},
 					},
-					"chapter": map[string]interface{}{
-						"type": "integer",
+				},
+				"filter": map[string]interface{}{
+					"greek_stemmer": map[string]interface{}{
+						"type":     "stemmer",
+						"language": "greek",
 					},
-					"section": map[string]interface{}{
-						"type": "integer",
+					"greek_stop": map[string]interface{}{
+						"type":      "stop",
+						"stopwords": "_greek_",
 					},
-					"perseusTextLink": map[string]interface{}{
-						"type": "keyword",
-					},
-					// Add additional fields here if needed
 				},
 			},
 		},
