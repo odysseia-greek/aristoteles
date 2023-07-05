@@ -1,5 +1,9 @@
 package aristoteles
 
+import (
+	"fmt"
+)
+
 type BuilderImpl struct {
 }
 
@@ -50,7 +54,7 @@ func (b *BuilderImpl) MultipleMatch(mappedFields []map[string]string) map[string
 	return query
 }
 
-func (b *BuilderImpl) MultiMatchWithGram(queryWord string) map[string]interface{} {
+func (b *BuilderImpl) MultiMatchWithGram(queryWord, field string) map[string]interface{} {
 	return map[string]interface{}{
 		"size": 15,
 		"query": map[string]interface{}{
@@ -58,11 +62,23 @@ func (b *BuilderImpl) MultiMatchWithGram(queryWord string) map[string]interface{
 				"query": queryWord,
 				"type":  "bool_prefix",
 				"fields": [3]string{
-					"greek", "greek._2gram", "greek._3gram",
+					field, fmt.Sprintf("%s._2gram", field), fmt.Sprintf("%s._3gram", field),
 				},
 			},
 		},
 	}
+}
+
+func (b *BuilderImpl) MatchPhrasePrefixed(queryWord, field string) map[string]interface{} {
+	query := map[string]interface{}{
+		"query": map[string]interface{}{
+			"match_phrase_prefix": map[string]interface{}{
+				field: queryWord,
+			},
+		},
+	}
+
+	return query
 }
 
 func (b *BuilderImpl) Aggregate(aggregate, field string) map[string]interface{} {
@@ -110,6 +126,187 @@ func (b *BuilderImpl) SearchAsYouTypeIndex(searchWord string) map[string]interfa
 			},
 		},
 	}
+}
+
+func (b *BuilderImpl) TextIndex() map[string]interface{} {
+	return map[string]interface{}{
+		"mappings": map[string]interface{}{
+			"properties": map[string]interface{}{
+				"author": map[string]interface{}{
+					"type": "keyword",
+				},
+				"greek": map[string]interface{}{
+					"type":     "text",
+					"analyzer": "greek_analyzer",
+					"fields": map[string]interface{}{
+						"keyword": map[string]interface{}{
+							"type": "keyword",
+						},
+					},
+				},
+				"translations": map[string]interface{}{
+					"type": "text",
+				},
+				"book": map[string]interface{}{
+					"type": "integer",
+				},
+				"chapter": map[string]interface{}{
+					"type": "integer",
+				},
+				"section": map[string]interface{}{
+					"type": "integer",
+				},
+				"perseusTextLink": map[string]interface{}{
+					"type": "keyword",
+				},
+			},
+		},
+		"settings": map[string]interface{}{
+			"analysis": map[string]interface{}{
+				"analyzer": map[string]interface{}{
+					"greek_analyzer": map[string]interface{}{
+						"type":      "custom",
+						"tokenizer": "standard",
+						"filter": []string{
+							"lowercase",
+							"greek_stop",
+							"greek_stemmer",
+						},
+					},
+				},
+				"filter": map[string]interface{}{
+					"greek_stop": map[string]interface{}{
+						"type":      "stop",
+						"stopwords": "_greek_",
+					},
+					"greek_stemmer": map[string]interface{}{
+						"type":     "stemmer",
+						"language": "greek",
+					},
+				},
+			},
+		},
+	}
+}
+
+func (b *BuilderImpl) QuizIndex() map[string]interface{} {
+	return map[string]interface{}{
+		"mappings": map[string]interface{}{
+			"properties": map[string]interface{}{
+				"method": map[string]interface{}{
+					"type": "keyword",
+				},
+				"category": map[string]interface{}{
+					"type": "keyword",
+				},
+				"greek": map[string]interface{}{
+					"type": "text",
+					"fields": map[string]interface{}{
+						"keyword": map[string]interface{}{
+							"type": "keyword",
+						},
+					},
+				},
+				"translation": map[string]interface{}{
+					"type": "text",
+					"fields": map[string]interface{}{
+						"keyword": map[string]interface{}{
+							"type": "keyword",
+						},
+					},
+				},
+				"chapter": map[string]interface{}{
+					"type": "integer",
+				},
+				// Add additional fields here if needed
+			},
+		},
+	}
+}
+
+func (b *BuilderImpl) GrammarIndex() map[string]interface{} {
+	return map[string]interface{}{
+		"mappings": map[string]interface{}{
+			"properties": map[string]interface{}{
+				"declension": map[string]interface{}{
+					"type": "keyword",
+				},
+				"ruleName": map[string]interface{}{
+					"type": "text",
+					"fields": map[string]interface{}{
+						"keyword": map[string]interface{}{
+							"type": "keyword",
+						},
+					},
+				},
+				"searchTerm": map[string]interface{}{
+					"type": "text",
+					"fields": map[string]interface{}{
+						"keyword": map[string]interface{}{
+							"type": "keyword",
+						},
+					},
+				},
+			},
+		},
+	}
+
+}
+
+func (b *BuilderImpl) DictionaryIndex(min, max int) map[string]interface{} {
+	nGramDiff := max - min
+	return map[string]interface{}{
+		"settings": map[string]interface{}{
+			"index": map[string]interface{}{
+				"max_ngram_diff": nGramDiff,
+			},
+			"analysis": map[string]interface{}{
+				"analyzer": map[string]interface{}{
+					"greek_analyzer": map[string]interface{}{
+						"tokenizer": "greek_tokenizer",
+					},
+				},
+				"tokenizer": map[string]interface{}{
+					"greek_tokenizer": map[string]interface{}{
+						"type":        "ngram",
+						"min_gram":    min,
+						"max_gram":    max,
+						"token_chars": []string{"letter"},
+					},
+				},
+			},
+		},
+		"mappings": map[string]interface{}{
+			"properties": map[string]interface{}{
+				"greek": map[string]interface{}{
+					"type":     "text",
+					"analyzer": "greek_analyzer",
+					"fields": map[string]interface{}{
+						"keyword": map[string]interface{}{
+							"type": "keyword",
+						},
+					},
+				},
+				"english": map[string]interface{}{
+					"type": "text",
+					"fields": map[string]interface{}{
+						"keyword": map[string]interface{}{
+							"type": "keyword",
+						},
+					},
+				},
+				"dutch": map[string]interface{}{
+					"type": "text",
+					"fields": map[string]interface{}{
+						"keyword": map[string]interface{}{
+							"type": "keyword",
+						},
+					},
+				},
+			},
+		},
+	}
+
 }
 
 func (b *BuilderImpl) Index() map[string]interface{} {

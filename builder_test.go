@@ -29,7 +29,7 @@ func TestBuilderClient(t *testing.T) {
 		testClient, err := NewMockClient(file, status)
 		assert.Nil(t, err)
 
-		response := testClient.Builder().MultiMatchWithGram(searchWord)
+		response := testClient.Builder().MultiMatchWithGram(searchWord, term)
 		sut := fmt.Sprintf("%v", response)
 		assert.Contains(t, sut, searchWord)
 	})
