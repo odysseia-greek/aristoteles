@@ -46,6 +46,10 @@ type Builder interface {
 	FilteredAggregate(term, queryWord, aggregate, field string) map[string]interface{}
 	SearchAsYouTypeIndex(searchWord string) map[string]interface{}
 	Index() map[string]interface{}
+	TextIndex() map[string]interface{}
+	DictionaryIndex() map[string]interface{}
+	GrammarIndex() map[string]interface{}
+	QuizIndex() map[string]interface{}
 }
 
 type Health interface {
