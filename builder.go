@@ -154,11 +154,8 @@ func (b *BuilderImpl) TextIndex() map[string]interface{} {
 							"type": "integer",
 						},
 						"fields": map[string]interface{}{
-							"type": "text",
-							"fields": map[string]interface{}{
-								"keyword": map[string]interface{}{
-									"type": "keyword",
-								},
+							"keyword": map[string]interface{}{
+								"type": "keyword",
 							},
 						},
 						"perseusTextLink": map[string]interface{}{
@@ -166,6 +163,9 @@ func (b *BuilderImpl) TextIndex() map[string]interface{} {
 						},
 						"section": map[string]interface{}{
 							"type": "integer",
+						},
+						"type": map[string]interface{}{
+							"type": "text",
 						},
 					},
 				},
@@ -175,24 +175,25 @@ func (b *BuilderImpl) TextIndex() map[string]interface{} {
 			"analysis": map[string]interface{}{
 				"analyzer": map[string]interface{}{
 					"greek_analyzer": map[string]interface{}{
-						"type":     "custom",
+						"filter":    []string{"lowercase", "greek_stop", "greek_stemmer"},
 						"tokenizer": "standard",
-						"filter":   []string{"lowercase", "greek_stop", "greek_stemmer"},
+						"type":      "custom",
 					},
 				},
 				"filter": map[string]interface{}{
 					"greek_stemmer": map[string]interface{}{
-						"type":     "stemmer",
 						"language": "greek",
+						"type":     "stemmer",
 					},
 					"greek_stop": map[string]interface{}{
-						"type":      "stop",
 						"stopwords": "_greek_",
+						"type":      "stop",
 					},
 				},
 			},
 		},
 	}
+
 
 }
 
