@@ -136,7 +136,7 @@ func (b *BuilderImpl) TextIndex() map[string]interface{} {
 					"type": "keyword",
 				},
 				"greek": map[string]interface{}{
-					"type":     "text",
+					"type": "text",
 					"analyzer": "greek_analyzer",
 					"fields": map[string]interface{}{
 						"keyword": map[string]interface{}{
@@ -145,29 +145,19 @@ func (b *BuilderImpl) TextIndex() map[string]interface{} {
 					},
 				},
 				"translations": map[string]interface{}{
-					"type": "nested",
-					"properties": map[string]interface{}{
-						"book": map[string]interface{}{
-							"type": "integer",
-						},
-						"chapter": map[string]interface{}{
-							"type": "integer",
-						},
-						"fields": map[string]interface{}{
-							"keyword": map[string]interface{}{
-								"type": "keyword",
-							},
-						},
-						"perseusTextLink": map[string]interface{}{
-							"type": "keyword",
-						},
-						"section": map[string]interface{}{
-							"type": "integer",
-						},
-						"type": map[string]interface{}{
-							"type": "text",
-						},
-					},
+					"type": "text",
+				},
+				"book": map[string]interface{}{
+					"type": "integer",
+				},
+				"chapter": map[string]interface{}{
+					"type": "integer",
+				},
+				"section": map[string]interface{}{
+					"type": "integer",
+				},
+				"perseusTextLink": map[string]interface{}{
+					"type": "keyword",
 				},
 			},
 		},
@@ -175,26 +165,28 @@ func (b *BuilderImpl) TextIndex() map[string]interface{} {
 			"analysis": map[string]interface{}{
 				"analyzer": map[string]interface{}{
 					"greek_analyzer": map[string]interface{}{
-						"filter":    []string{"lowercase", "greek_stop", "greek_stemmer"},
+						"type": "custom",
 						"tokenizer": "standard",
-						"type":      "custom",
+						"filter": []string{
+							"lowercase",
+							"greek_stop",
+							"greek_stemmer",
+						},
 					},
 				},
 				"filter": map[string]interface{}{
-					"greek_stemmer": map[string]interface{}{
-						"language": "greek",
-						"type":     "stemmer",
-					},
 					"greek_stop": map[string]interface{}{
-						"stopwords": "_greek_",
-						"type":      "stop",
+						"type":       "stop",
+						"stopwords":  "_greek_",
+					},
+					"greek_stemmer": map[string]interface{}{
+						"type":     "stemmer",
+						"language": "greek",
 					},
 				},
 			},
 		},
 	}
-
-
 }
 
 func (b *BuilderImpl) QuizIndex() map[string]interface{} {
